@@ -18,6 +18,7 @@
   "homepage": "https://github.com/DDP-01/Syrah_CallSignLocator",
   "dependencies": {
     "body-parser": "^1.12.4",
-    "express": "^4.12.4"
+    "express": "^4.12.4",
+    "phantomjs": "^1.9.17"
   }
 }

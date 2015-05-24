@@ -9,17 +9,32 @@
     $(document).ready(function() {
       $("#btn1").click(function() {
         //alert("shit");
-        var str = document.getElementById("CallSign").value;
-        //alert(str);
 
-        $.post("/searchCallSign", {
+        //document.getElementById('span').innerHTML="Not Found";
+        var str = document.getElementById("CallSign").value;
+        if ($.trim(str)=='') {
+          alert('CallSign cannot be empty');
+          return;
+        }
+        //alert(str);
+        alert('searching may take pretty pretty long.....Pease wait patiently');
+        alert('please wait patiently');
+        alert('please wait patiently.\n(What\'s important needs to be told 3 times.....)');
+        $.post("/searchCallSign",
+          {
             CallSign: str
           },
           function(res, status) {
             //alert(status);
             alert(JSON.stringify(res));
-
             //do something
+            if (res.succ) {
+              //do something
+              document.getElementById('span').innerHTML="<a href=\""+res.ServerLocation+"\">T2 Server</a>";
+            } else {
+              alert('CallSign Not Found or Error Occurs');
+              document.getElementById('span').innerHTML="Not Found";
+            }
           });
       });
     });
@@ -39,6 +54,7 @@
   <button id="btn1"> search </button>
   <hr />
 
+  <p><span id='span'></span></p>
 
 
 </body>

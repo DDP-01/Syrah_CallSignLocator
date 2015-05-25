@@ -77,30 +77,22 @@ app.get('/public/*.*', function(req, res) {
 app.post('/searchCallSign', function(req, res) {
   console.log(req.url);
   console.log(req.body);
-  process.on('uncaughtException', function(err) {
-    console.error(err);
-  });
 
-  try {
-    searchSeverLists(0, req.body.CallSign, res);
-  } catch (e) {
-    console.error(e);
-  }
 
-  /*
   //search nonRecursively
   CallSignList[CallSignList.length] = 0;
   tempCallSignListCount = CallSignList.length - 1;
 
   process.on('uncaughtException', function(err) {
     console.error('Error caught in uncaughtException event:', err);
-    console.log('uncaughtException: shitshitshitshit ' + CallSignList[CallSignList.length-1]+'/'+ServerList.length);
-    if (++CallSignList[CallSignList.length-1] == ServerList.length) {
+    /*
+    console.log('uncaughtException: shitshitshitshit ' + CallSignList[CallSignList.length - 1] + '/' + ServerList.length);
+    if (++CallSignList[CallSignList.length - 1] == ServerList.length) {
       console.log('notFound');
       res.json({
         succ: false
       });
-    }
+    }*/
   });
 
 
@@ -110,7 +102,7 @@ app.post('/searchCallSign', function(req, res) {
       searchSeverListsNonRecursive(ServerList[i], req.body.CallSign, res, tempCallSignListCount, i)
     } catch (e) {
       console.error(e);
-      console.log('catch: shitshitshitshit ' + CallSignList[tempCallSignListCount]+'/'+ServerList.length);
+      console.log('catch: shitshitshitshit ' + CallSignList[tempCallSignListCount] + '/' + ServerList.length);
       if (++CallSignList[tempCallSignListCount] == ServerList.length) {
         console.log('notFound');
         res.json({
@@ -120,94 +112,95 @@ app.post('/searchCallSign', function(req, res) {
       }
     }
   }
-*/
+
 });
 
-function searchSeverListsNonRecursive(Server, CallSign, response, tempCallSignListCount, count) {
-  console.log(Server);
-  http.get(Server, function(res) {
-    var body = '';
-    res.on('data', function(chunk) {
-      //console.log(data);
-      body += chunk;
-    });
+function searchSeverListsNonRecursive(Server, CallSign, response, CallSignNum, count) {
+    console.log(Server);
+    http.get(Server, function(res) {
+      var body = '';
+      res.on('data', function(chunk) {
+        //console.log(data);
+        body += chunk;
+      });
 
-    res.on('error', function(err) {
-      console.error(err);
-      console.log('err at' + count);
-      console.log('res.error: shitshitshitshit ' + CallSignList[tempCallSignListCount] + '/' + ServerList.length);
-      if (++CallSignList[tempCallSignListCount] == ServerList.length) {
-        console.log('notFound');
-        response.json({
-          succ: false
-        });
-      }
-    });
-
-    res.on('end', function() {
-      //console.log(body);
-      if (body.search(RegExp('</[Hh][tT][mM][lL]>')) != -1) {
-        console.log(count + ': end of html');
-        console.log('res.end : shitshitshitshit ' + CallSignList[tempCallSignListCount] + '/' + ServerList.length);
-        if (++CallSignList[tempCallSignListCount] == ServerList.length) {
+      res.on('error', function(err) {
+        console.error(err);
+        console.log('err at' + count);
+        console.log('res.error: shitshitshitshit ' + CallSignList[CallSignNum] + '/' + ServerList.length);
+        if (++CallSignList[CallSignNum] == ServerList.length) {
           console.log('notFound');
-          try {
+          response.json({
+            succ: false
+          });
+        }
+      });
+
+      res.on('end', function() {
+        //console.log(body);
+        if (body.search(RegExp('</[Hh][tT][mM][lL]>')) != -1) {
+          console.log(count + ': end of html');
+          console.log('res.end : shitshitshitshit ' + CallSignList[CallSignNum] + '/' + ServerList.length);
+          if (++CallSignList[CallSignNum] == ServerList.length) {
+            console.log('notFound');
+            try {
+              response.json({
+                succ: false
+              });
+            } catch (e) {
+              console.error(e);
+            }
+          }
+          if (body.search(CallSign) != -1) {
+            console.log('shit found here');
             response.json({
-              succ: false
+              succ: true,
+              ServerLocation: Server
             });
-          } catch (e) {
-            console.error(e);
           }
         }
-        if (body.search(CallSign) != -1) {
-          console.log('shit found here');
-          response.json({
-            succ: true,
-            ServerLocation: Server
-          });
-        }
-      }
+      });
     });
-  });
-}
-
-function searchSeverLists(ServerItr, CallSign, response) {
-  //console.log(response);
-  if (ServerItr == ServerList.length) {
-    console.log('notFound');
-    res.json({
-      succ: false
-    });
-    return;
   }
-  //console.log(ServerItr + ': ' + ServerList[ServerItr]);
-  console.log(ServerList[ServerItr]);
-  http.get(ServerList[ServerItr++], function(res) {
-    var body = '';
-    res.on('data', function(data) {
-      console.log(data);
-      body += data;
-      //console.log(body);
-      if (body.search(RegExp('</[Hh][tT][mM][lL]>')) != -1) {
-        console.log(body);
-        console.log('end of </html>');
-        if (body.search(CallSign) == -1)
-          searchSeverLists(ServerItr, CallSign, response);
-        else {
-          console.log('shit found here')
-          response.json({
-            succ: true,
-            ServerLocation: ServerList[ServerItr]
-          });
-          return;
+  /*
+  function searchSeverLists(ServerItr, CallSign, response) {
+    //console.log(response);
+    if (ServerItr == ServerList.length) {
+      console.log('notFound');
+      res.json({
+        succ: false
+      });
+      return;
+    }
+    //console.log(ServerItr + ': ' + ServerList[ServerItr]);
+    console.log(ServerList[ServerItr]);
+    http.get(ServerList[ServerItr++], function(res) {
+      var body = '';
+      res.on('data', function(data) {
+        console.log(data);
+        body += data;
+        //console.log(body);
+        if (body.search(RegExp('</[Hh][tT][mM][lL]>')) != -1) {
+          console.log(body);
+          console.log('end of </html>');
+          if (body.search(CallSign) == -1)
+            searchSeverLists(ServerItr, CallSign, response);
+          else {
+            console.log('shit found here')
+            response.json({
+              succ: true,
+              ServerLocation: ServerList[ServerItr]
+            });
+            return;
+          }
         }
-      }
+      });
+    }).on('error', function(err) {
+      console.error(err);
+      searchSeverLists(++ServerItr, CallSign, response);
     });
-  }).on('error', function(err) {
-    console.error(err);
-    searchSeverLists(++ServerItr, CallSign, response);
-  });
-}
+  }
+  */
 
 //error handler
 app.use(function(req, res) {

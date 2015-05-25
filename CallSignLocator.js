@@ -1,6 +1,7 @@
 var express = require('express');
 var http = require('http');
 var bodyParser = require('body-parser');
+var fs=require('fs');
 
 var path = require('path');
 var childProcess = require('child_process');
@@ -102,6 +103,7 @@ app.post('/searchCallSign', function(req, res) {
       searchSeverListsNonRecursive(ServerList[i], req.body.CallSign, res, tempCallSignListCount, i)
     } catch (e) {
       console.error(e);
+      /*
       console.log('catch: shitshitshitshit ' + CallSignList[tempCallSignListCount] + '/' + ServerList.length);
       if (++CallSignList[tempCallSignListCount] == ServerList.length) {
         console.log('notFound');
@@ -109,7 +111,7 @@ app.post('/searchCallSign', function(req, res) {
           succ: false
         });
         return;
-      }
+      }*/
     }
   }
 
@@ -120,14 +122,14 @@ function searchSeverListsNonRecursive(Server, CallSign, response, CallSignNum, c
     http.get(Server, function(res) {
       var body = '';
       res.on('data', function(chunk) {
-        //console.log(data);
+        //console.log(chunk);
         body += chunk;
       });
 
       res.on('error', function(err) {
         console.error(err);
         console.log('err at' + count);
-        console.log('res.error: shitshitshitshit ' + CallSignList[CallSignNum] + '/' + ServerList.length);
+        //console.log('res.error: shitshitshitshit ' + CallSignList[CallSignNum] + '/' + ServerList.length);
         if (++CallSignList[CallSignNum] == ServerList.length) {
           console.log('notFound');
           response.json({
@@ -137,10 +139,24 @@ function searchSeverListsNonRecursive(Server, CallSign, response, CallSignNum, c
       });
 
       res.on('end', function() {
-        //console.log(body);
+
+        fs.appendFile('./received.log', body + '\n', 'utf-8', function(err) {
+          if (err) {
+            console.log(err);
+          }
+        });
+        console.log(body);
         if (body.search(RegExp('</[Hh][tT][mM][lL]>')) != -1) {
           console.log(count + ': end of html');
-          console.log('res.end : shitshitshitshit ' + CallSignList[CallSignNum] + '/' + ServerList.length);
+          console.log(body.search(CallSign));
+          if (body.search(CallSign) != -1) {
+            console.log('shit found here');
+            response.json({
+              succ: true,
+              ServerLocation: Server
+            });
+          }
+          //console.log('res.end : shitshitshitshit ' + CallSignList[CallSignNum] + '/' + ServerList.length);
           if (++CallSignList[CallSignNum] == ServerList.length) {
             console.log('notFound');
             try {
@@ -151,13 +167,7 @@ function searchSeverListsNonRecursive(Server, CallSign, response, CallSignNum, c
               console.error(e);
             }
           }
-          if (body.search(CallSign) != -1) {
-            console.log('shit found here');
-            response.json({
-              succ: true,
-              ServerLocation: Server
-            });
-          }
+
         }
       });
     });

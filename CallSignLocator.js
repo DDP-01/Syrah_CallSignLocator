@@ -8,7 +8,7 @@ var phantomjs = require('phantomjs');
 var binPath = phantomjs.path;
 var ServerList = new Array();
 
-//console.log(binPath);
+console.log(binPath);
 var childArgs = [
   path.join(__dirname, '/phantomScript.js'),
   'http://status.aprs2.net'
@@ -96,7 +96,8 @@ function searchSeverLists(ServerItr, CallSign, response) {
       });
       return;
     }
-    console.log(ServerItr + ': ' + ServerList[ServerItr]);
+    //console.log(ServerItr + ': ' + ServerList[ServerItr]);
+    console.log(ServerList[ServerItr]);
     http.get(ServerList[ServerItr++], function(res) {
       var body = '';
       res.on('data', function(data) {

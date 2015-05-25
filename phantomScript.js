@@ -4,7 +4,7 @@ var page=require('webpage').create();
 var url=system.args[1];
 //console.log(url);
 
-var d=Date.now();
+var t=Date.now();
 page.open(url,function (status) {
   //console.log(status);
   if(status==='success'){

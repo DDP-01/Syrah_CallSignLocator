@@ -9,8 +9,9 @@ page.open(url,function (status) {
   //console.log(status);
   if(status==='success'){
     phantom.outputEncoding='utf-8';
-    //console.log(page.content);
-    console.log(Date.now()-t);
+    console.log(page.content);
+    t=Date.now()-t;
+    console.log(t);
   } else {
     console.log('failed');
   }

@@ -91,6 +91,8 @@ app.post('/searchCallSign', function(req, res) {
     ];
 
     childProcess.execFile(binPath,CPArgs,function (err,stdout,stderr) {
+      count++;
+      console.log('we got shit here: '+coutn);
       if (err) {
         console.error(err);
       }

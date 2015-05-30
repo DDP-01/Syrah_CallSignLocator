@@ -82,17 +82,17 @@ app.post('/searchCallSign', function(req, res) {
   console.log(req.body);
 
   var count=0;
+  var Found=false;
   for(var i=0;i<ServerList.length;i++){
+    var T2Server=ServerList[i];
     var CPArgs=[
       path.join(__dirname, '/phantomScript.js'),
-      ServerList[i]//,
-      //'–load-images=false',
-      //'–disk-cache=true'
+      T2Server
     ];
 
     childProcess.execFile(binPath,CPArgs,function (err,stdout,stderr) {
       count++;
-      console.log('we got shit here: '+coutn);
+      console.log('we got shit here: '+count+'/'+ServerList.length);
       if (err) {
         console.error(err);
       }
@@ -100,7 +100,14 @@ app.post('/searchCallSign', function(req, res) {
         console.error(stderr);
       }
       if (stdout) {
-        console.log(count+': '+stdout);
+        console.log(stdout);
+        if (!Found&&stdout.search(req.body.CallSign)!=-1) {
+          res.json({
+            succ:true,
+            ServerLocation:T2Server
+          });
+          Found=true;
+        }
       }
     });
 

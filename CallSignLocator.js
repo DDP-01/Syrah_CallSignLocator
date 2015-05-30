@@ -1,7 +1,7 @@
 var express = require('express');
 var http = require('http');
 var bodyParser = require('body-parser');
-var fs=require('fs');
+var fs = require('fs');
 
 var path = require('path');
 var childProcess = require('child_process');
@@ -15,7 +15,7 @@ var CallSignCount = 0;
 console.log(binPath);
 var childArgs = [
   path.join(__dirname, '/phantomScript.js'),
-  'http://status.aprs2.net'//,
+  'http://status.aprs2.net' //,
   //'–load-images=false',
   //'–disk-cache=true'
 ];
@@ -81,18 +81,25 @@ app.post('/searchCallSign', function(req, res) {
   console.log(req.url);
   console.log(req.body);
 
-  var count=0;
-  var Found=false;
-  for(var i=0;i<ServerList.length;i++){
-    var T2Server=ServerList[i];
-    var CPArgs=[
-      path.join(__dirname, '/phantomScript.js'),
-      T2Server
-    ];
+  var count = 0;
+  var Found = false;
+  for (var i = 0; i < ServerList.length; i++) {
+    var T2Server = ServerList[i];
+    var Cmd = binPath + ' phantomScript.js ' + T2Server;
+    var option = {
+      timeout: 115000,
+      killSignal: 'SIGTERM'
+    }
 
-    childProcess.execFile(binPath,CPArgs,function (err,stdout,stderr) {
+    childProcess.exec(Cmd, option, function(err, stdout, stderr) {
       count++;
-      console.log('we got shit here: '+count+'/'+ServerList.length);
+      console.log('we got shit here: ' + count + '/' + ServerList.length);
+      if (!Found && count == ServerList.length) {
+        res.json({
+          succ: false
+        });
+        console.log('false->res sent');
+      }
       if (err) {
         console.error(err);
       }
@@ -100,13 +107,13 @@ app.post('/searchCallSign', function(req, res) {
         console.error(stderr);
       }
       if (stdout) {
-        console.log(stdout);
-        if (!Found&&stdout.search(req.body.CallSign)!=-1) {
+        //console.log(stdout);
+        if (!Found && stdout.search(req.body.CallSign) != -1) {
+          Found = true;
           res.json({
-            succ:true,
-            ServerLocation:T2Server
+            succ: true,
+            ServerLocation: T2Server
           });
-          Found=true;
         }
       }
     });
